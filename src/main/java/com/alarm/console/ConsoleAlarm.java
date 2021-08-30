@@ -1,7 +1,9 @@
 package com.alarm.console;
 
 import com.alarm.Alarm;
+import com.alarm.Audio;
 
+import java.io.File;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -9,6 +11,10 @@ import java.util.*;
 public class ConsoleAlarm implements Alarm {
 
     private Date alarmDate;
+    private final File SOUND_FILE = new File("CoolBit.wav");
+    private final int SIGNAL_DURATION = 1 * 60 * 1000;
+    private boolean signaling = true;
+    private Audio audio = null;
 
     @Override
     public void init() {
@@ -19,12 +25,11 @@ public class ConsoleAlarm implements Alarm {
             public void run() {
                 giveSignal();
             }
-        }, 1000, 300);
+        }, 0, 1000);
         System.out.println("Приложение \"Будильник\"");
         int choice = Integer.MAX_VALUE;
         while (choice != 0) {
             menu();
-            System.out.print("Команда: ");
             choice = scanner.nextInt();
             switch (choice) {
                 case 0:
@@ -45,6 +50,9 @@ public class ConsoleAlarm implements Alarm {
                     break;
                 case 3:
                     candleAlarmDate();
+                    break;
+                case 4:
+                    signaling = false;
                     break;
                 default:
                     System.out.println("Неверная команда.");
@@ -83,6 +91,7 @@ public class ConsoleAlarm implements Alarm {
         System.out.println("2 - установить будильник");
         System.out.println("3 - отменить будильник");
         System.out.println("0 - выход");
+        System.out.print("Команда: ");
     }
 
     @Override
@@ -96,13 +105,38 @@ public class ConsoleAlarm implements Alarm {
     public boolean giveSignal() {
         if (alarmDate == null)
             return false;
+
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy E HH:mm:ss");
         if (dateFormat.format(alarmDate).equals(getCurrentData())) {
-            System.out.println();
-            System.out.println("The alarm clock ring!!!");
+            signalMenu();
+            audio = new Audio(SOUND_FILE);
+            audio.signal(SIGNAL_DURATION);
             return true;
         }
+
+        if (audio != null) {
+            if (!audio.isPlaying()) {
+                signaling = false;
+                System.out.println();
+                menu();
+            }
+
+            if (!isSignaling()) {
+                signaling = true;
+                audio.stop();
+                audio = null;
+                candleAlarmDate();
+            }
+        }
+
         return false;
+    }
+
+    public void signalMenu() {
+        System.out.println();
+        System.out.println("The alarm clock ring!!!");
+        System.out.println("4 - выключить сигнал");
+        System.out.print("Команда: ");
     }
 
     @Override
@@ -118,5 +152,9 @@ public class ConsoleAlarm implements Alarm {
     @Override
     public void candleAlarmDate() {
         this.alarmDate = null;
+    }
+
+    public boolean isSignaling() {
+        return signaling;
     }
 }
