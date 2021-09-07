@@ -17,10 +17,6 @@ public class ConsoleWatch implements Watch {
         return dateFormat.format(new Date());
     }
 
-    public TimeZone getTimeZone() {
-        return timeZone;
-    }
-
     @Override
     public boolean setTimeZone(String timeZone) {
         if (isTimeZone(timeZone)) {
@@ -31,6 +27,7 @@ public class ConsoleWatch implements Watch {
     }
 
     public boolean isTimeZone(String timeZone) {
-        return timeZone.matches("GMT [+,-][0-9]");
+        return timeZone.matches("GMT[+,-][1-9]") ||
+                timeZone.matches("GMT");
     }
 }

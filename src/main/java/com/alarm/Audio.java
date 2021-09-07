@@ -3,21 +3,18 @@ package com.alarm;
 import javax.sound.sampled.*;
 import java.io.File;
 import java.io.IOException;
-import java.util.Scanner;
 import java.util.Timer;
 import java.util.TimerTask;
 
 public class Audio {
 
-    private AudioInputStream stream = null;
     private Clip clip = null;
     private boolean playing = false;
     private boolean released = false;
     private int duration = 0;
 
     public Audio(File f) {
-        try {
-            stream = AudioSystem.getAudioInputStream(f);
+        try (AudioInputStream stream = AudioSystem.getAudioInputStream(f)) {
             clip = AudioSystem.getClip();
             clip.open(stream);
             released = true;
@@ -62,6 +59,5 @@ public class Audio {
 
     public boolean isPlaying() {
         return playing;
-
     }
 }

@@ -1,10 +1,13 @@
 package com.alarm;
 
-import java.util.Date;
+import java.util.Timer;
 
 public interface Alarm {
     boolean awaken();
-    boolean setAlarm(Date date);
+    boolean establishAlarm(String time);
+    void setSignaling(boolean signaling);
     void candleAlarm();
-    void init();
+    void checkAwaken(Timer timer);
+    Watch getWatch();
+    Audio getAudio();
 }
