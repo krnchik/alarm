@@ -23,7 +23,7 @@ public class ConsoleAlarm implements Alarm {
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
-                giveSignal();
+                awaken();
             }
         }, 0, 1000);
         System.out.println("Приложение \"Будильник\"");
@@ -36,7 +36,7 @@ public class ConsoleAlarm implements Alarm {
                     timer.cancel();
                     break;
                 case 1:
-                    System.out.println(getCurrentData());
+//                    System.out.println(getCurrentData());
                     break;
                 case 2:
                     try {
@@ -49,7 +49,7 @@ public class ConsoleAlarm implements Alarm {
                     }
                     break;
                 case 3:
-                    candleAlarmDate();
+                    candleAlarm();
                     break;
                 case 4:
                     signaling = false;
@@ -62,18 +62,18 @@ public class ConsoleAlarm implements Alarm {
     }
 
     public boolean establishAlarm(String time) throws ParseException {
-        if (!isCorrectTime(time)){
-            System.out.println("Время указано не корректно: " + time);
-            return false;
-        }
-        Date date = new SimpleDateFormat("dd/MM/yyyy E HH:mm:ss")
-                .parse(getCurrentData().substring(0, 14) + time + ":00");
-        if (!setAlarmDate(date)){
-            Calendar cal = Calendar.getInstance();
-            cal.setTime(date);
-            cal.add(Calendar.DAY_OF_YEAR, 1);
-            setAlarmDate(cal.getTime());
-        }
+//        if (!isCorrectTime(time)){
+//            System.out.println("Время указано не корректно: " + time);
+//            return false;
+//        }
+//        Date date = new SimpleDateFormat("dd/MM/yyyy E HH:mm:ss")
+////                .parse(getCurrentData().substring(0, 14) + time + ":00");
+//        if (!setAlarm(date)){
+//            Calendar cal = Calendar.getInstance();
+//            cal.setTime(date);
+//            cal.add(Calendar.DAY_OF_YEAR, 1);
+//            setAlarm(cal.getTime());
+//        }
         return true;
     }
 
@@ -95,24 +95,17 @@ public class ConsoleAlarm implements Alarm {
     }
 
     @Override
-    public String getCurrentData() {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy E HH:mm:ss");
-        dateFormat.setTimeZone(TimeZone.getTimeZone("GMT+04"));
-        return dateFormat.format(new Date());
-    }
-
-    @Override
-    public boolean giveSignal() {
+    public boolean awaken() {
         if (alarmDate == null)
             return false;
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy E HH:mm:ss");
-        if (dateFormat.format(alarmDate).equals(getCurrentData())) {
-            signalMenu();
-            audio = new Audio(SOUND_FILE);
-            audio.signal(SIGNAL_DURATION);
-            return true;
-        }
+//        if (dateFormat.format(alarmDate).equals(getCurrentData())) {
+//            signalMenu();
+//            audio = new Audio(SOUND_FILE);
+//            audio.signal(SIGNAL_DURATION);
+//            return true;
+//        }
 
         if (audio != null) {
             if (!audio.isPlaying()) {
@@ -125,7 +118,7 @@ public class ConsoleAlarm implements Alarm {
                 signaling = true;
                 audio.stop();
                 audio = null;
-                candleAlarmDate();
+                candleAlarm();
             }
         }
 
@@ -140,7 +133,7 @@ public class ConsoleAlarm implements Alarm {
     }
 
     @Override
-    public boolean setAlarmDate(Date alarmDate) {
+    public boolean setAlarm(Date alarmDate) {
         Date currentDate = new Date();
         if (alarmDate.after(currentDate)) {
             this.alarmDate = alarmDate;
@@ -150,7 +143,7 @@ public class ConsoleAlarm implements Alarm {
     }
 
     @Override
-    public void candleAlarmDate() {
+    public void candleAlarm() {
         this.alarmDate = null;
     }
 
