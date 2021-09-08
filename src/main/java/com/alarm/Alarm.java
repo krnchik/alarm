@@ -7,6 +7,7 @@ public interface Alarm {
     boolean establishAlarm(String time);
     void setSignaling(boolean signaling);
     void candleAlarm();
+    String giveRemainTime();
     void checkAwaken(Timer timer);
     Watch getWatch();
     Audio getAudio();

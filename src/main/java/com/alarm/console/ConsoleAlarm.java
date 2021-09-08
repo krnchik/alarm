@@ -8,6 +8,7 @@ import java.io.File;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 public class ConsoleAlarm implements Alarm {
 
@@ -29,7 +30,7 @@ public class ConsoleAlarm implements Alarm {
         }
         Date date = null;
         try {
-            date = new SimpleDateFormat("dd/MM/yyyy E HH:mm:ss")
+            date = giveSimpleDateFormat()
                     .parse(getCurrentData().substring(0, 14) + time + ":00");
         } catch (ParseException e) {
             e.printStackTrace();
@@ -55,7 +56,7 @@ public class ConsoleAlarm implements Alarm {
         if (alarm == null)
             return false;
 
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy E HH:mm:ss");
+        SimpleDateFormat dateFormat = giveSimpleDateFormat();
         if (dateFormat.format(alarm).equals(getCurrentData())) {
             audio = new Audio(SOUND_FILE);
             audio.signal(SIGNAL_DURATION);
@@ -103,6 +104,36 @@ public class ConsoleAlarm implements Alarm {
     @Override
     public Audio getAudio() {
         return audio;
+    }
+
+    @Override
+    public String giveRemainTime() {
+        if (alarm == null)
+            return "Будильник не установлен";
+
+        SimpleDateFormat sdf = giveSimpleDateFormat();
+        try {
+            Date currentDate = sdf.parse(getCurrentData());
+            long diff = alarm.getTime() - currentDate.getTime();
+            long minutes = TimeUnit.MILLISECONDS.toMinutes(diff);
+            long hours = TimeUnit.MILLISECONDS.toHours(diff);
+            if (minutes >= 60) {
+                minutes = minutes - hours * 60;
+                if (minutes == 0)
+                    return "Через " + hours + " ч ";
+                return "Через " + hours + " ч " + minutes + " мин";
+            }
+            if (minutes == 0)
+                return "Менее 1 мин";
+            return "Через " + minutes + " мин";
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
+
+    public SimpleDateFormat giveSimpleDateFormat() {
+        return new SimpleDateFormat("dd/MM/yyyy E HH:mm:ss");
     }
 
     public boolean setAlarm(Date alarmDate) {

@@ -52,7 +52,8 @@ public class AlarmApp {
                     if (!alarm.getWatch().setTimeZone(zone))
                         System.out.println("Часовой пояс указан не корректно: " + zone);
                 }
-                case "5" -> alarm.setSignaling(false);
+                case "5" -> System.out.println(alarm.giveRemainTime());
+                case "6" -> alarm.setSignaling(false);
                 default -> System.out.println("Неверная команда.");
             }
         }
@@ -68,6 +69,7 @@ public class AlarmApp {
         System.out.println("2 - установить будильник");
         System.out.println("3 - отменить будильник");
         System.out.println("4 - сменить часовой пояс");
+        System.out.println("5 - осталось до сигнала");
         System.out.println("0 - выход");
         System.out.print("Команда: ");
     }
@@ -92,7 +94,7 @@ public class AlarmApp {
     public void awakenMenu() {
         System.out.println();
         System.out.println("The alarm clock ring!!!");
-        System.out.println("5 - выключить сигнал");
+        System.out.println("6 - выключить сигнал");
         System.out.print("Команда: ");
     }
 }
