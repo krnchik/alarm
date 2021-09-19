@@ -1,21 +1,24 @@
-package com.alarm.console;
+package com.krnchik;
 
-import com.alarm.Alarm;
-import com.alarm.Audio;
+import com.krnchik.alarm.Alarm;
+import com.krnchik.alarm.ConsoleAlarm;
+import com.krnchik.audio.Audio;
+import com.krnchik.watch.Watch;
 
+import java.util.Date;
 import java.util.Scanner;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class AlarmApp {
+public class App {
     private final Alarm alarm;
 
-    public AlarmApp(Alarm alarm) {
+    public App(Alarm alarm) {
         this.alarm = alarm;
     }
 
     public static void main(String[] args) {
-        AlarmApp app = new AlarmApp(new ConsoleAlarm());
+        App app = new App(new ConsoleAlarm());
         app.init();
     }
 
@@ -31,15 +34,15 @@ public class AlarmApp {
             choice = scanner.next();
             switch (choice) {
                 case "0" -> System.exit(0);
-                case "1" -> System.out.println(alarm.getWatch().getCurrentData());
+                case "1" -> System.out.println(getCurrentData());
                 case "2" -> {
                     System.out.println("Введите время: hh:mm");
                     String time = scanner.next().trim();
                     if (!alarm.establishAlarm(time)) {
                         System.out.println("Время указано не корректно: " + time);
                         System.out.println("Будильник не установлен");
-                    }
-                    System.out.println("Будильник установлен на " + time);
+                    } else
+                        System.out.println("Будильник установлен на " + time);
                 }
                 case "3" -> {
                     alarm.candleAlarm();
@@ -49,7 +52,7 @@ public class AlarmApp {
                     System.out.println("Введите часовой пояс GMT");
                     scanner.nextLine();
                     String zone = scanner.nextLine();
-                    if (!alarm.getWatch().setTimeZone(zone))
+                    if (!alarm.getWatch().setTimeZone(alarm, zone))
                         System.out.println("Часовой пояс указан не корректно: " + zone);
                 }
                 case "5" -> System.out.println(alarm.giveRemainTime());
@@ -57,6 +60,12 @@ public class AlarmApp {
                 default -> System.out.println("Неверная команда.");
             }
         }
+    }
+
+    private String getCurrentData() {
+        Watch watch = alarm.getWatch();
+        Date currentData = watch.getCurrentData();
+        return watch.convertToString(currentData);
     }
 
     public void menu() {
@@ -82,7 +91,7 @@ public class AlarmApp {
             public void run() {
                 Audio audio = alarm.getAudio();
                 if (audio != null) {
-                    if (audio.isPlaying() && count == 0){
+                    if (audio.isPlaying() && count == 0) {
                         awakenMenu();
                         count++;
                     }

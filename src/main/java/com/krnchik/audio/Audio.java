@@ -1,4 +1,4 @@
-package com.alarm;
+package com.krnchik.audio;
 
 import javax.sound.sampled.*;
 import java.io.File;
