@@ -18,6 +18,7 @@ public class AlarmManager {
         this.watch = ConsoleWatch.getInstance();
         this.alarm = new ConsoleAlarm(watch, new Audio(file));
         checkAwaken();
+        checkSkippedAlarm();
     }
 
     public boolean add(String time) {
@@ -61,6 +62,9 @@ public class AlarmManager {
         for (AlarmWrapper aw : set) {
             String time = aw.getTime();
             String str = time + "  " + alarm.giveRemainTime(time);
+            if (i == 0) {
+                str = time + "  " + giveRemainTime();
+            }
             alarms[i++] = str;
         }
         return alarms;
@@ -72,11 +76,6 @@ public class AlarmManager {
             @Override
             public void run() {
                 if (alarm.awaken()) {
-                    try {
-                        Thread.sleep(10);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
                     set.remove(set.first());
                     establishAlarm();
                 } else {
@@ -88,6 +87,18 @@ public class AlarmManager {
         }, 0, 1000);
     }
 
+    public void checkSkippedAlarm() {
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                if (!alarm.awaken() && alarm.giveRemainTime().contains("-")) {
+                    remove(set.first().getTime());
+                }
+            }
+        }, 0, 10000);
+    }
+
     public boolean changeTimeZone(String timeZone) {
         if (watch.setTimeZone(timeZone)) {
             rebootAlarms();
@@ -95,6 +106,10 @@ public class AlarmManager {
             return true;
         }
         return false;
+    }
+
+    public boolean hasAlarms() {
+        return set.isEmpty();
     }
 
     public String giveCurrentTime() {
