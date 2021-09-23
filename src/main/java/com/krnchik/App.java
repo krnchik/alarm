@@ -1,24 +1,27 @@
 package com.krnchik;
 
-import com.krnchik.alarm.Alarm;
-import com.krnchik.alarm.AlarmManager;
-import com.krnchik.alarm.ConsoleAlarm;
+import com.krnchik.model.alarm.Alarm;
+import com.krnchik.model.alarm.AlarmContainer;
+import com.krnchik.model.alarm.AlarmModel;
+import com.krnchik.model.alarm.Container;
+import com.krnchik.model.audio.Audio;
 
 import java.io.File;
 import java.util.Scanner;
 
 public class App {
 
-    private final AlarmManager am;
+    private final Container container;
 
-    public App(AlarmManager am) {
-        this.am = am;
+    public App(Container container) {
+        this.container = container;
     }
 
     public static void main(String[] args) {
         File file = new File("CoolBit.wav");
-        Alarm alarm = new ConsoleAlarm();
-        App app = new App(new AlarmManager(alarm, file));
+        Alarm alarm = new AlarmModel(new Audio(file));
+        Container container = new AlarmContainer(alarm);
+        App app = new App(container);
         app.init();
     }
 
@@ -31,11 +34,13 @@ public class App {
             choice = scanner.next();
             switch (choice) {
                 case "0" -> System.exit(0);
-                case "1" -> System.out.println(am.giveCurrentTime());
+                case "1" -> System.out.println(container.getAlarm()
+                        .getWatch()
+                        .giveCurrentTime());
                 case "2" -> {
                     System.out.println("Введите время: hh:mm");
                     String time = scanner.next().trim();
-                    if (!am.add(time)) {
+                    if (!container.add(time)) {
                         System.out.println("Время указано не корректно: " + time);
                         System.out.println("Будильник не установлен");
                     } else
@@ -44,7 +49,7 @@ public class App {
                 case "3" -> {
                     System.out.println("Введите время: hh:mm");
                     String time = scanner.next().trim();
-                    if (am.remove(time)) {
+                    if (container.remove(time)) {
                         System.out.println("Будильник на " + time + " удален");
                     } else {
                         System.out.println("Будильник на " + time + " не удален");
@@ -54,18 +59,18 @@ public class App {
                     System.out.println("Введите часовой пояс GMT");
                     scanner.nextLine();
                     String zone = scanner.nextLine();
-                    if (!am.changeTimeZone(zone))
+                    if (!container.changeTimeZone(zone))
                         System.out.println("Часовой пояс указан не корректно: " + zone);
                 }
-                case "5" -> System.out.println(am.giveRemainTime());
+                case "5" -> System.out.println(container.getAlarm().giveRemainTime());
                 case "6" -> {
-                    String[] alarms = am.showAlarms();
+                    String[] alarms = container.showAlarms();
                     for (String a : alarms) {
                         System.out.println();
                         System.out.println(a);
                     }
                 }
-                case "7" -> am.getAlarm().setStop(true);
+                case "7" -> container.getAlarm().setStop(true);
                 default -> System.out.println("Неверная команда.");
             }
         }

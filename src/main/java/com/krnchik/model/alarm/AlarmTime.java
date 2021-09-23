@@ -1,16 +1,16 @@
-package com.krnchik.alarm;
+package com.krnchik.model.alarm;
 
 import java.util.Objects;
 
-public class AlarmWrapper implements Comparable<AlarmWrapper> {
+public class AlarmTime implements Comparable<AlarmTime> {
 
     private Alarm alarm;
     private String time;
     private Long difference;
 
-    public AlarmWrapper(Alarm alarm, String time) {
+    public AlarmTime(Alarm alarm, String time) {
         time = time.trim();
-        if (alarm.isCorrectTime(time)) {
+        if (alarm.getWatch().isCorrectTime(time)) {
             this.alarm = alarm;
             setTime(time);
         }
@@ -25,7 +25,7 @@ public class AlarmWrapper implements Comparable<AlarmWrapper> {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        AlarmWrapper that = (AlarmWrapper) o;
+        AlarmTime that = (AlarmTime) o;
         return Objects.equals(time, that.time);
     }
 
@@ -36,7 +36,7 @@ public class AlarmWrapper implements Comparable<AlarmWrapper> {
     }
 
     @Override
-    public int compareTo(AlarmWrapper aw) {
+    public int compareTo(AlarmTime aw) {
         if (time.equals(aw.getTime()))
             return 0;
         if (difference > aw.getDifference())
@@ -51,7 +51,7 @@ public class AlarmWrapper implements Comparable<AlarmWrapper> {
 
     public void setTime(String time) {
         this.time = time;
-        this.difference = alarm.giveRemainMinutes(alarm.giveAlarmDate(time));
+        this.difference = alarm.giveRemainMinutes(time);
     }
 
     public Long getDifference() {

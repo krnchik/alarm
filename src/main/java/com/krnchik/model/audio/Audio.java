@@ -1,4 +1,4 @@
-package com.krnchik.audio;
+package com.krnchik.model.audio;
 
 import javax.sound.sampled.*;
 import java.io.File;

@@ -1,44 +1,37 @@
-package com.krnchik.alarm;
+package com.krnchik.model.alarm;
 
-import com.krnchik.audio.Audio;
-import com.krnchik.watch.ConsoleWatch;
-import com.krnchik.watch.Watch;
+import com.krnchik.model.audio.Audio;
+import com.krnchik.model.watch.WatchModel;
+import com.krnchik.model.watch.Watch;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
-public class ConsoleAlarm implements Alarm {
+public class AlarmModel implements Alarm {
 
     private final Watch watch;
-    private Audio audio;
-    private long duration;
+    private final Audio audio;
     private Date alarm;
     private boolean signaling = false;
     private boolean stop = false;
 
-    public ConsoleAlarm() {
-        this.watch = ConsoleWatch.getInstance();
-    }
-
-    public ConsoleAlarm(Watch watch, Audio audio) {
-        this.watch = watch;
+    public AlarmModel(Audio audio) {
+        this.watch = WatchModel.getInstance();
         this.audio = audio;
-        this.duration = audio.getMelodyDuration();
     }
 
     @Override
-    public boolean establishAlarm(String time) {
+    public void establishAlarm(String time) {
         if (time == null)
             throw new IllegalArgumentException();
 
-        if (!isCorrectTime(time)) {
-            return false;
+        if (!watch.isCorrectTime(time)) {
+            return;
         }
 
         setAlarm(giveAlarmDate(time));
-        return true;
     }
 
     @Override
@@ -46,6 +39,7 @@ public class ConsoleAlarm implements Alarm {
         this.alarm = null;
     }
 
+    @Override
     public Watch getWatch() {
         return watch;
     }
@@ -71,7 +65,6 @@ public class ConsoleAlarm implements Alarm {
         return giveRemainTime(date);
     }
 
-    @Override
     public String giveRemainTime(Date alarm) {
         if (alarm == null)
             return "Будильник не установлен";
@@ -96,19 +89,15 @@ public class ConsoleAlarm implements Alarm {
     }
 
     @Override
-    public long giveRemainMinutes(Date alarm) {
+    public long giveRemainMinutes(String time) {
+        Date alarm = giveAlarmDate(time);
         Date currentDate = getCurrentData();
         long diff = alarm.getTime() - currentDate.getTime();
         return TimeUnit.MILLISECONDS.toMinutes(diff);
     }
 
-    public Date getAlarm() {
-        return alarm;
-    }
-
-    @Override
     public Date giveAlarmDate(String time) {
-        if (!isCorrectTime(time))
+        if (!watch.isCorrectTime(time))
             throw new IllegalArgumentException();
         Date currentDate = getCurrentData();
         String current = watch.convertToString(currentDate);
@@ -135,9 +124,9 @@ public class ConsoleAlarm implements Alarm {
         String alarmTime = watch.convertToString(alarm);
         String currentTime = watch.convertToString(getCurrentData());
         if (alarmTime.equals(currentTime)) {
-            if (isSignaling()) {
-                audio.restartSignal();
-            }
+//            if (isSignaling()) {
+//                audio.restartSignal();
+//            }
             audio.signal();
             signaling = true;
             return true;
@@ -173,10 +162,6 @@ public class ConsoleAlarm implements Alarm {
 
     public boolean isSignaling() {
         return signaling;
-    }
-
-    public boolean isCorrectTime(String time) {
-        return time.matches("[0-2][0-9]:[0-5][0-9]");
     }
 
     private Date getCurrentData() {

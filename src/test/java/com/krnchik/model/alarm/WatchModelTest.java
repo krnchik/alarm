@@ -1,21 +1,19 @@
-package com.krnchik.alarm;
+package com.krnchik.model.alarm;
 
-import com.krnchik.watch.ConsoleWatch;
-import com.krnchik.watch.Watch;
+import com.krnchik.model.watch.WatchModel;
+import com.krnchik.model.watch.Watch;
 import org.junit.Before;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class ConsoleWatchTest {
+public class WatchModelTest {
 
     private Watch watch;
-    private Alarm alarm;
 
     @Before
     public void setUp() {
-        watch = ConsoleWatch.getInstance();
-        alarm = new ConsoleAlarm();
+        watch = WatchModel.getInstance();
     }
 
     @Test

@@ -1,38 +1,33 @@
-package com.krnchik.alarm;
+package com.krnchik.model.alarm;
 
-import com.krnchik.audio.Audio;
-import com.krnchik.watch.ConsoleWatch;
-import com.krnchik.watch.Watch;
-
-import java.io.File;
 import java.util.*;
 
-public class AlarmManager {
+public class AlarmContainer implements Container {
 
-    private final TreeSet<AlarmWrapper> set;
-    private final Watch watch;
+    private final TreeSet<AlarmTime> set;
     private final Alarm alarm;
 
-    public AlarmManager(Alarm alarm, File file) {
+    public AlarmContainer(Alarm alarm) {
         this.set = new TreeSet<>();
-        this.watch = ConsoleWatch.getInstance();
-        this.alarm = new ConsoleAlarm(watch, new Audio(file));
+        this.alarm = alarm;
         checkAwaken();
         checkSkippedAlarm();
     }
 
+    @Override
     public boolean add(String time) {
-        AlarmWrapper aw = new AlarmWrapper(alarm, time);
+        AlarmTime aw = new AlarmTime(alarm, time);
         if (aw.isNull())
             return false;
         rebootAlarms();
-        set.add(new AlarmWrapper(alarm, time));
+        set.add(new AlarmTime(alarm, time));
         establishAlarm();
         return true;
     }
 
+    @Override
     public boolean remove(String time) {
-        AlarmWrapper aw = new AlarmWrapper(alarm, time);
+        AlarmTime aw = new AlarmTime(alarm, time);
         if (aw.isNull())
             return false;
         if (aw.equals(set.first())) {
@@ -44,22 +39,24 @@ public class AlarmManager {
         return set.remove(aw);
     }
 
-    public boolean establishAlarm() {
+    @Override
+    public void establishAlarm() {
         if (set.isEmpty()) {
-            return false;
+            return;
         }
         String time = set.first().getTime();
-        return alarm.establishAlarm(time);
+        alarm.establishAlarm(time);
     }
 
     public String giveRemainTime() {
         return alarm.giveRemainTime();
     }
 
+    @Override
     public String[] showAlarms() {
         String[] alarms = new String[set.size()];
         int i = 0;
-        for (AlarmWrapper aw : set) {
+        for (AlarmTime aw : set) {
             String time = aw.getTime();
             String str = time + "  " + alarm.giveRemainTime(time);
             if (i == 0) {
@@ -96,11 +93,12 @@ public class AlarmManager {
                     remove(set.first().getTime());
                 }
             }
-        }, 0, 10000);
+        }, 0, 10250);
     }
 
+    @Override
     public boolean changeTimeZone(String timeZone) {
-        if (watch.setTimeZone(timeZone)) {
+        if (alarm.getWatch().setTimeZone(timeZone)) {
             rebootAlarms();
             establishAlarm();
             return true;
@@ -108,23 +106,15 @@ public class AlarmManager {
         return false;
     }
 
-    public boolean hasAlarms() {
-        return set.isEmpty();
-    }
-
-    public String giveCurrentTime() {
-        Date currentData = watch.getCurrentData();
-        return watch.convertToString(currentData);
-    }
-
     private void rebootAlarms() {
-        TreeSet<AlarmWrapper> newSet = new TreeSet<>(set);
+        TreeSet<AlarmTime> newSet = new TreeSet<>(set);
         set.clear();
-        for (AlarmWrapper aw : newSet) {
+        for (AlarmTime aw : newSet) {
             add(aw.getTime());
         }
     }
 
+    @Override
     public Alarm getAlarm() {
         return alarm;
     }

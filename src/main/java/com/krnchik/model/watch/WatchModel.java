@@ -1,33 +1,33 @@
-package com.krnchik.watch;
+package com.krnchik.model.watch;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
 
-public class ConsoleWatch implements Watch {
+public class WatchModel implements Watch {
 
-    private static ConsoleWatch instance;
+    private static WatchModel instance;
     String defaultZone = "GMT+04";
     TimeZone timeZone = TimeZone.getTimeZone(defaultZone);
     SimpleDateFormat dateFormat;
 
-    private ConsoleWatch() {
+    private WatchModel() {
         this.dateFormat = new SimpleDateFormat("dd/MM/yyyy E HH:mm:ss");
     }
 
-    public static ConsoleWatch getInstance() {
+    public static WatchModel getInstance() {
         if (instance == null) {
-            synchronized (ConsoleWatch.class) {
+            synchronized (WatchModel.class) {
                 if (instance == null)
-                    instance = new ConsoleWatch();
+                    instance = new WatchModel();
             }
         }
         return instance;
     }
 
     @Override
-    public Date getCurrentData() {
+    public synchronized Date getCurrentData() {
         dateFormat.setTimeZone(timeZone);
         String date = convertToString(new Date());
         return parseToDate(date);
@@ -40,6 +40,16 @@ public class ConsoleWatch implements Watch {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public String giveCurrentTime() {
+        Date currentData = getCurrentData();
+        return convertToString(currentData);
+    }
+
+    public boolean isCorrectTime(String time) {
+        return time.matches("[0-2][0-9]:[0-5][0-9]");
     }
 
     @Override
