@@ -31,7 +31,7 @@ public class AlarmTime implements Comparable<AlarmTime> {
 
     @Override
     public int hashCode() {
-        String hash = time.substring(0,2) + time.substring(3,5);
+        String hash = time.substring(0, 2) + time.substring(3, 5);
         return Integer.parseInt(hash);
     }
 
