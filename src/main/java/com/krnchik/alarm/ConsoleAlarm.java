@@ -46,7 +46,6 @@ public class ConsoleAlarm implements Alarm {
         this.alarm = null;
     }
 
-    @Override
     public Watch getWatch() {
         return watch;
     }
@@ -103,7 +102,6 @@ public class ConsoleAlarm implements Alarm {
         return TimeUnit.MILLISECONDS.toMinutes(diff);
     }
 
-    @Override
     public Date getAlarm() {
         return alarm;
     }
@@ -125,7 +123,6 @@ public class ConsoleAlarm implements Alarm {
     }
 
     public void setAlarm(Date alarmDate) {
-        SimpleDateFormat sdf = watch.getDateFormat();
         String date = watch.convertToString(alarmDate);
         this.alarm = parseToAlarmDate(date);
     }

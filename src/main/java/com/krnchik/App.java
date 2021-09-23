@@ -3,11 +3,9 @@ package com.krnchik;
 import com.krnchik.alarm.Alarm;
 import com.krnchik.alarm.AlarmManager;
 import com.krnchik.alarm.ConsoleAlarm;
-import com.krnchik.audio.Audio;
 
 import java.io.File;
 import java.util.Scanner;
-import java.util.Timer;
 
 public class App {
 
@@ -20,7 +18,6 @@ public class App {
     public static void main(String[] args) {
         File file = new File("CoolBit.wav");
         Alarm alarm = new ConsoleAlarm();
-        Audio audio = new Audio(file);
         App app = new App(new AlarmManager(alarm, file));
         app.init();
     }

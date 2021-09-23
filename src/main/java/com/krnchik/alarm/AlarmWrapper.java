@@ -49,10 +49,6 @@ public class AlarmWrapper implements Comparable<AlarmWrapper> {
         return time;
     }
 
-    public void setAlarm(Alarm alarm) {
-        this.alarm = alarm;
-    }
-
     public void setTime(String time) {
         this.time = time;
         this.difference = alarm.giveRemainMinutes(alarm.giveAlarmDate(time));

@@ -9,16 +9,14 @@ import java.util.*;
 
 public class AlarmManager {
 
-    private TreeSet<AlarmWrapper> set;
-    private Watch watch;
-    private Audio audio;
-    private Alarm alarm;
+    private final TreeSet<AlarmWrapper> set;
+    private final Watch watch;
+    private final Alarm alarm;
 
     public AlarmManager(Alarm alarm, File file) {
         this.set = new TreeSet<>();
         this.watch = ConsoleWatch.getInstance();
-        this.audio = new Audio(file);
-        this.alarm = new ConsoleAlarm(watch, audio);
+        this.alarm = new ConsoleAlarm(watch, new Audio(file));
         checkAwaken();
     }
 

@@ -3,8 +3,6 @@ package com.krnchik.audio;
 import javax.sound.sampled.*;
 import java.io.File;
 import java.io.IOException;
-import java.util.Timer;
-import java.util.TimerTask;
 
 public class Audio {
 

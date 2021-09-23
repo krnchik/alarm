@@ -1,7 +1,5 @@
 package com.krnchik.watch;
 
-import com.krnchik.alarm.Alarm;
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -63,11 +61,6 @@ public class ConsoleWatch implements Watch {
     @Override
     public SimpleDateFormat getDateFormat() {
         return dateFormat;
-    }
-
-    @Override
-    public String getDefaultZone() {
-        return defaultZone;
     }
 
     @Override
