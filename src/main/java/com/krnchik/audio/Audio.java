@@ -11,38 +11,25 @@ public class Audio {
     private Clip clip = null;
     private boolean playing = false;
     private boolean released = false;
-    private int duration = 0;
+    private long melodyDuration = 0;
+    private long duration = 0;
 
     public Audio(File f) {
         try (AudioInputStream stream = AudioSystem.getAudioInputStream(f)) {
             clip = AudioSystem.getClip();
             clip.open(stream);
+            melodyDuration = clip.getMicrosecondLength();
             released = true;
         } catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
             e.printStackTrace();
         }
     }
 
-    public void signal(int milliseconds) {
+    public void signal() {
         if (isReleased()) {
-            Timer timer = new Timer();
             clip.setMicrosecondPosition(0);
             clip.start();
             playing = true;
-            clip.loop(Clip.LOOP_CONTINUOUSLY);
-            timer.schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    duration++;
-                    if (duration >= milliseconds && isPlaying()) {
-                        playing = false;
-                        duration = 0;
-                        clip.stop();
-                        clip.close();
-                        timer.cancel();
-                    }
-                }
-            }, 0, 1);
         }
     }
 
@@ -50,6 +37,26 @@ public class Audio {
         if (isReleased() && isPlaying()) {
             clip.stop();
             playing = false;
+        }
+    }
+
+    public long getMelodyDuration() {
+        return melodyDuration;
+    }
+
+    public void setMelodyDuration(long melodyDuration) {
+        this.melodyDuration = melodyDuration;
+    }
+
+    public boolean isEndMelody() {
+        return clip.getMicrosecondPosition() >= melodyDuration;
+    }
+
+    public void restartSignal() {
+        if (isReleased()) {
+            clip.stop();
+            clip.setMicrosecondPosition(0);
+            clip.start();
         }
     }
 

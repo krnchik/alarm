@@ -1,71 +1,77 @@
 package com.krnchik;
 
 import com.krnchik.alarm.Alarm;
+import com.krnchik.alarm.AlarmManager;
 import com.krnchik.alarm.ConsoleAlarm;
 import com.krnchik.audio.Audio;
-import com.krnchik.watch.Watch;
 
-import java.util.Date;
+import java.io.File;
 import java.util.Scanner;
 import java.util.Timer;
-import java.util.TimerTask;
 
 public class App {
-    private final Alarm alarm;
 
-    public App(Alarm alarm) {
-        this.alarm = alarm;
+    private final AlarmManager am;
+
+    public App(AlarmManager am) {
+        this.am = am;
     }
 
     public static void main(String[] args) {
-        App app = new App(new ConsoleAlarm());
+        File file = new File("CoolBit.wav");
+        Alarm alarm = new ConsoleAlarm();
+        Audio audio = new Audio(file);
+        App app = new App(new AlarmManager(alarm, file));
         app.init();
     }
 
     public void init() {
         Scanner scanner = new Scanner(System.in);
-        Timer timer = new Timer();
         System.out.println("Приложение \"Будильник\"");
-        alarm.checkAwaken(timer);
-        isPlaying(timer);
         String choice = "";
         while (!choice.equals("0")) {
             menu();
             choice = scanner.next();
             switch (choice) {
                 case "0" -> System.exit(0);
-                case "1" -> System.out.println(getCurrentData());
+                case "1" -> System.out.println(am.giveCurrentTime());
                 case "2" -> {
                     System.out.println("Введите время: hh:mm");
                     String time = scanner.next().trim();
-                    if (!alarm.establishAlarm(time)) {
+                    if (!am.add(time)) {
                         System.out.println("Время указано не корректно: " + time);
                         System.out.println("Будильник не установлен");
                     } else
                         System.out.println("Будильник установлен на " + time);
                 }
                 case "3" -> {
-                    alarm.candleAlarm();
-                    System.out.println("Будильник отменен");
+                    System.out.println("Введите время: hh:mm");
+                    String time = scanner.next().trim();
+                    if (am.remove(time)) {
+                        System.out.println("Будильник на " + time + " удален");
+                    } else {
+                        System.out.println("Будильник на " + time + " не удален");
+                    }
                 }
                 case "4" -> {
                     System.out.println("Введите часовой пояс GMT");
                     scanner.nextLine();
                     String zone = scanner.nextLine();
-                    if (!alarm.getWatch().setTimeZone(alarm, zone))
+                    if (!am.changeTimeZone(zone))
                         System.out.println("Часовой пояс указан не корректно: " + zone);
                 }
-                case "5" -> System.out.println(alarm.giveRemainTime());
-                case "6" -> alarm.setSignaling(false);
+                case "5" -> System.out.println(am.giveRemainTime());
+                case "6" -> {
+                    String[] alarms = am.showAlarms();
+                    for (String a : alarms) {
+                        System.out.println();
+                        System.out.println(a);
+                    }
+                }
+                case "7" -> am.getAlarm().setStop(true);
                 default -> System.out.println("Неверная команда.");
             }
         }
-    }
-
-    private String getCurrentData() {
-        Watch watch = alarm.getWatch();
-        Date currentData = watch.getCurrentData();
-        return watch.convertToString(currentData);
     }
 
     public void menu() {
@@ -75,35 +81,14 @@ public class App {
             e.printStackTrace();
         }
         System.out.println("1 - узнать текущее время и дату");
-        System.out.println("2 - установить будильник");
-        System.out.println("3 - отменить будильник");
+        System.out.println("2 - добавить будильник");
+        System.out.println("3 - удалить будильник");
         System.out.println("4 - сменить часовой пояс");
         System.out.println("5 - осталось до сигнала");
+        System.out.println("6 - показать будильники");
+        System.out.println("7 - выключить будильник");
         System.out.println("0 - выход");
         System.out.print("Команда: ");
     }
 
-    public void isPlaying(Timer timer) {
-        timer.schedule(new TimerTask() {
-            int count = 0;
-
-            @Override
-            public void run() {
-                Audio audio = alarm.getAudio();
-                if (audio != null) {
-                    if (audio.isPlaying() && count == 0) {
-                        awakenMenu();
-                        count++;
-                    }
-                }
-            }
-        }, 0, 1000);
-    }
-
-    public void awakenMenu() {
-        System.out.println();
-        System.out.println("The alarm clock ring!!!");
-        System.out.println("6 - выключить сигнал");
-        System.out.print("Команда: ");
-    }
 }

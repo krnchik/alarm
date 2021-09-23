@@ -7,13 +7,16 @@ import java.util.Date;
 import java.util.Timer;
 
 public interface Alarm {
-    boolean awaken();
     boolean establishAlarm(String time);
-    void setSignaling(boolean signaling);
+    boolean isCorrectTime(String time);
+    boolean awaken();
+    void setStop(boolean stop);
     void candleAlarm();
     String giveRemainTime();
-    void checkAwaken(Timer timer);
-    String getAlarmTime();
+    String giveRemainTime(Date alarm);
+    String giveRemainTime(String time);
+    long giveRemainMinutes(Date alarm);
+    Date giveAlarmDate(String time);
     Watch getWatch();
     Audio getAudio();
     Date getAlarm();

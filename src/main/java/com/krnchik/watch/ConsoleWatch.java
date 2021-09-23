@@ -9,11 +9,23 @@ import java.util.TimeZone;
 
 public class ConsoleWatch implements Watch {
 
-    TimeZone timeZone = TimeZone.getTimeZone("GMT+04");
+    private static ConsoleWatch instance;
+    String defaultZone = "GMT+04";
+    TimeZone timeZone = TimeZone.getTimeZone(defaultZone);
     SimpleDateFormat dateFormat;
 
-    public ConsoleWatch() {
+    private ConsoleWatch() {
         this.dateFormat = new SimpleDateFormat("dd/MM/yyyy E HH:mm:ss");
+    }
+
+    public static ConsoleWatch getInstance() {
+        if (instance == null) {
+            synchronized (ConsoleWatch.class) {
+                if (instance == null)
+                    instance = new ConsoleWatch();
+            }
+        }
+        return instance;
     }
 
     @Override
@@ -24,12 +36,9 @@ public class ConsoleWatch implements Watch {
     }
 
     @Override
-    public boolean setTimeZone(Alarm alarm, String timeZone) {
+    public boolean setTimeZone(String timeZone) {
         if (isTimeZone(timeZone)) {
             this.timeZone = TimeZone.getTimeZone(timeZone);
-            if (alarm.getAlarmTime() != null) {
-                alarm.establishAlarm(alarm.getAlarmTime());
-            }
             return true;
         }
         return false;
@@ -40,7 +49,6 @@ public class ConsoleWatch implements Watch {
         return dateFormat.format(date);
     }
 
-    @Override
     public Date parseToDate(String dateStr) {
         Date date;
         try {
@@ -55,6 +63,16 @@ public class ConsoleWatch implements Watch {
     @Override
     public SimpleDateFormat getDateFormat() {
         return dateFormat;
+    }
+
+    @Override
+    public String getDefaultZone() {
+        return defaultZone;
+    }
+
+    @Override
+    public TimeZone getTimeZone() {
+        return timeZone;
     }
 
     public boolean isTimeZone(String timeZone) {

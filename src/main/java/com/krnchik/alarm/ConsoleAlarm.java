@@ -4,22 +4,28 @@ import com.krnchik.audio.Audio;
 import com.krnchik.watch.ConsoleWatch;
 import com.krnchik.watch.Watch;
 
-import java.io.File;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 public class ConsoleAlarm implements Alarm {
 
-    private Date alarm;
-    private String alarmTime;
-    private final File SOUND_FILE = new File("CoolBit.wav");
-    private final int SIGNAL_DURATION = 1 * 60 * 1000;
-    private boolean signaling = true;
-    private Audio audio = null;
     private final Watch watch;
+    private Audio audio;
+    private long duration;
+    private Date alarm;
+    private boolean signaling = false;
+    private boolean stop = false;
 
     public ConsoleAlarm() {
-        this.watch = new ConsoleWatch();
+        this.watch = ConsoleWatch.getInstance();
+    }
+
+    public ConsoleAlarm(Watch watch, Audio audio) {
+        this.watch = watch;
+        this.audio = audio;
+        this.duration = audio.getMelodyDuration();
     }
 
     @Override
@@ -31,62 +37,13 @@ public class ConsoleAlarm implements Alarm {
             return false;
         }
 
-        String currentDate = watch.convertToString(getCurrentData());
-        Date date = watch.parseToDate(currentDate.substring(0, 14) + time + ":00");
-        if (!setAlarm(date)) {
-            Calendar cal = Calendar.getInstance();
-            cal.setTime(date);
-            cal.add(Calendar.DAY_OF_YEAR, 1);
-            setAlarm(cal.getTime());
-        }
-        this.alarmTime = time;
+        setAlarm(giveAlarmDate(time));
         return true;
     }
 
     @Override
     public void candleAlarm() {
         this.alarm = null;
-        this.alarmTime = null;
-    }
-
-    @Override
-    public boolean awaken() {
-        if (alarm == null)
-            return false;
-
-        String alarmTime = watch.convertToString(alarm);
-        String currentTime = watch.convertToString(getCurrentData());
-        if (alarmTime.equals(currentTime)) {
-            audio = new Audio(SOUND_FILE);
-            audio.signal(SIGNAL_DURATION);
-            return true;
-        }
-
-        if (audio != null) {
-            if (!audio.isPlaying()) {
-                signaling = false;
-            }
-
-            if (!isSignaling()) {
-                signaling = true;
-                audio.stop();
-                audio = null;
-                candleAlarm();
-            }
-        }
-
-        return false;
-    }
-
-    @Override
-    public void checkAwaken(Timer timer) {
-        timer = new Timer();
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                awaken();
-            }
-        }, 0, 1000);
     }
 
     @Override
@@ -95,8 +52,8 @@ public class ConsoleAlarm implements Alarm {
     }
 
     @Override
-    public void setSignaling(boolean signaling) {
-        this.signaling = signaling;
+    public void setStop(boolean stop) {
+        this.stop = stop;
     }
 
     @Override
@@ -106,6 +63,17 @@ public class ConsoleAlarm implements Alarm {
 
     @Override
     public String giveRemainTime() {
+        return giveRemainTime(this.alarm);
+    }
+
+    @Override
+    public String giveRemainTime(String time) {
+        Date date = giveAlarmDate(time);
+        return giveRemainTime(date);
+    }
+
+    @Override
+    public String giveRemainTime(Date alarm) {
         if (alarm == null)
             return "Будильник не установлен";
 
@@ -129,22 +97,81 @@ public class ConsoleAlarm implements Alarm {
     }
 
     @Override
+    public long giveRemainMinutes(Date alarm) {
+        Date currentDate = getCurrentData();
+        long diff = alarm.getTime() - currentDate.getTime();
+        return TimeUnit.MILLISECONDS.toMinutes(diff);
+    }
+
+    @Override
     public Date getAlarm() {
         return alarm;
     }
 
     @Override
-    public String getAlarmTime() {
-        return alarmTime;
+    public Date giveAlarmDate(String time) {
+        if (!isCorrectTime(time))
+            throw new IllegalArgumentException();
+        Date currentDate = getCurrentData();
+        String current = watch.convertToString(currentDate);
+        Date date = parseToAlarmDate(current.substring(0, 14) + time + ":00");
+        if (!date.after(currentDate)) {
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(date);
+            cal.add(Calendar.DAY_OF_YEAR, 1);
+            return cal.getTime();
+        }
+        return date;
     }
 
-    public boolean setAlarm(Date alarmDate) {
-        Date currentDate = getCurrentData();
-        if (alarmDate.after(currentDate)) {
-            this.alarm = alarmDate;
+    public void setAlarm(Date alarmDate) {
+        SimpleDateFormat sdf = watch.getDateFormat();
+        String date = watch.convertToString(alarmDate);
+        this.alarm = parseToAlarmDate(date);
+    }
+
+    @Override
+    public boolean awaken() {
+        if (alarm == null)
+            return false;
+
+        String alarmTime = watch.convertToString(alarm);
+        String currentTime = watch.convertToString(getCurrentData());
+        if (alarmTime.equals(currentTime)) {
+            if (isSignaling()) {
+                audio.restartSignal();
+            }
+            audio.signal();
+            signaling = true;
             return true;
         }
+
+        if (audio.isEndMelody()) {
+            stop = true;
+        }
+
+        if (isSignaling()) {
+            if (stop ^ !audio.isPlaying()) {
+                signaling = false;
+                stop = false;
+                audio.stop();
+            }
+        }
+
         return false;
+    }
+
+    public Date parseToAlarmDate(String dateStr) {
+        Date date;
+        try {
+            SimpleDateFormat sdf = watch.getDateFormat();
+            sdf.setTimeZone(watch.getTimeZone());
+            date = sdf.parse(dateStr);
+            return date;
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        throw new IllegalArgumentException();
     }
 
     public boolean isSignaling() {
