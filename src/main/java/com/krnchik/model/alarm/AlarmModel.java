@@ -127,7 +127,7 @@ public class AlarmModel implements Alarm {
 //            if (isSignaling()) {
 //                audio.restartSignal();
 //            }
-            audio.signal();
+            audio.start();
             signaling = true;
             return true;
         }

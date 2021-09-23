@@ -5,6 +5,7 @@ import com.krnchik.model.alarm.AlarmContainer;
 import com.krnchik.model.alarm.AlarmModel;
 import com.krnchik.model.alarm.Container;
 import com.krnchik.model.audio.Audio;
+import com.krnchik.model.audio.AudioModel;
 
 import java.io.File;
 import java.util.Scanner;
@@ -19,7 +20,8 @@ public class App {
 
     public static void main(String[] args) {
         File file = new File("CoolBit.wav");
-        Alarm alarm = new AlarmModel(new Audio(file));
+        Audio audio = new AudioModel(file);
+        Alarm alarm = new AlarmModel(audio);
         Container container = new AlarmContainer(alarm);
         App app = new App(container);
         app.init();
