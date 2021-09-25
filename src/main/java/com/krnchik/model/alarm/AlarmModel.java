@@ -1,6 +1,7 @@
 package com.krnchik.model.alarm;
 
 import com.krnchik.model.audio.Audio;
+import com.krnchik.model.history.History;
 import com.krnchik.model.watch.WatchModel;
 import com.krnchik.model.watch.Watch;
 
@@ -13,23 +14,21 @@ public class AlarmModel implements Alarm {
 
     private final Watch watch;
     private final Audio audio;
+    private final History history;
     private Date alarm;
     private boolean signaling = false;
     private boolean stop = false;
 
-    public AlarmModel(Audio audio) {
+    public AlarmModel(Audio audio, History history) {
+        this.history = history;
         this.watch = WatchModel.getInstance();
         this.audio = audio;
     }
 
     @Override
     public void establishAlarm(String time) {
-        if (time == null)
-            throw new IllegalArgumentException();
-
-        if (!watch.isCorrectTime(time)) {
-            return;
-        }
+        if (time == null || !watch.isCorrectTime(time))
+            throw new IllegalArgumentException(time);
 
         setAlarm(giveAlarmDate(time));
     }
@@ -69,7 +68,7 @@ public class AlarmModel implements Alarm {
         if (alarm == null)
             return "Будильник не установлен";
 
-        Date currentDate = getCurrentData();
+        Date currentDate = giveCurrentData();
         long diff = alarm.getTime() - currentDate.getTime();
         long minutes = TimeUnit.MILLISECONDS.toMinutes(diff);
         long hours = TimeUnit.MILLISECONDS.toHours(diff);
@@ -90,16 +89,18 @@ public class AlarmModel implements Alarm {
 
     @Override
     public long giveRemainMinutes(String time) {
+        if (!watch.isCorrectTime(time))
+            throw new IllegalArgumentException(time);
         Date alarm = giveAlarmDate(time);
-        Date currentDate = getCurrentData();
+        Date currentDate = giveCurrentData();
         long diff = alarm.getTime() - currentDate.getTime();
         return TimeUnit.MILLISECONDS.toMinutes(diff);
     }
 
     public Date giveAlarmDate(String time) {
         if (!watch.isCorrectTime(time))
-            throw new IllegalArgumentException();
-        Date currentDate = getCurrentData();
+            throw new IllegalArgumentException(time);
+        Date currentDate = giveCurrentData();
         String current = watch.convertToString(currentDate);
         Date date = parseToAlarmDate(current.substring(0, 14) + time + ":00");
         if (!date.after(currentDate)) {
@@ -122,12 +123,10 @@ public class AlarmModel implements Alarm {
             return false;
 
         String alarmTime = watch.convertToString(alarm);
-        String currentTime = watch.convertToString(getCurrentData());
+        String currentTime = watch.convertToString(giveCurrentData());
         if (alarmTime.equals(currentTime)) {
-//            if (isSignaling()) {
-//                audio.restartSignal();
-//            }
             audio.start();
+            history.write(alarm, watch.getTimeZone());
             signaling = true;
             return true;
         }
@@ -147,24 +146,29 @@ public class AlarmModel implements Alarm {
         return false;
     }
 
-    public Date parseToAlarmDate(String dateStr) {
-        Date date;
+    public Date parseToAlarmDate(String date) {
+        Date alarmDate;
         try {
             SimpleDateFormat sdf = watch.getDateFormat();
             sdf.setTimeZone(watch.getTimeZone());
-            date = sdf.parse(dateStr);
-            return date;
+            alarmDate = sdf.parse(date);
+            return alarmDate;
         } catch (ParseException e) {
             e.printStackTrace();
         }
-        throw new IllegalArgumentException();
+        throw new IllegalArgumentException(date);
     }
 
     public boolean isSignaling() {
         return signaling;
     }
 
-    private Date getCurrentData() {
+    @Override
+    public History getHistory() {
+        return history;
+    }
+
+    private Date giveCurrentData() {
         return watch.getCurrentData();
     }
 }

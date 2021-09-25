@@ -1,6 +1,7 @@
 package com.krnchik.model.alarm;
 
 import com.krnchik.model.audio.Audio;
+import com.krnchik.model.history.History;
 import com.krnchik.model.watch.Watch;
 
 public interface Alarm {
@@ -21,4 +22,6 @@ public interface Alarm {
     Audio getAudio();
 
     Watch getWatch();
+
+    History getHistory();
 }

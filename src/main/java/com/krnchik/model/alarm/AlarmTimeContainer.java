@@ -2,12 +2,12 @@ package com.krnchik.model.alarm;
 
 import java.util.*;
 
-public class AlarmContainer implements Container {
+public class AlarmTimeContainer implements Container {
 
     private final TreeSet<AlarmTime> set;
     private final Alarm alarm;
 
-    public AlarmContainer(Alarm alarm) {
+    public AlarmTimeContainer(Alarm alarm) {
         this.set = new TreeSet<>();
         this.alarm = alarm;
         checkAwaken();
@@ -73,6 +73,11 @@ public class AlarmContainer implements Container {
             @Override
             public void run() {
                 if (alarm.awaken()) {
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                     set.remove(set.first());
                     establishAlarm();
                 } else {
@@ -89,11 +94,15 @@ public class AlarmContainer implements Container {
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
-                if (!alarm.awaken() && alarm.giveRemainTime().contains("-")) {
+                if (!alarm.awaken() && isSkippedAlarm()) {
                     remove(set.first().getTime());
                 }
             }
         }, 0, 10250);
+    }
+
+    public boolean isSkippedAlarm() {
+        return alarm.giveRemainTime().contains("-");
     }
 
     @Override

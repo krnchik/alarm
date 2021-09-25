@@ -45,7 +45,9 @@ public class WatchModel implements Watch {
     @Override
     public String giveCurrentTime() {
         Date currentData = getCurrentData();
-        return convertToString(currentData);
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy EEEE HH:mm");
+        sdf.setTimeZone(timeZone);
+        return sdf.format(currentData);
     }
 
     public boolean isCorrectTime(String time) {

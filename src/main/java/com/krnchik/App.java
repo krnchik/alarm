@@ -1,11 +1,13 @@
 package com.krnchik;
 
 import com.krnchik.model.alarm.Alarm;
-import com.krnchik.model.alarm.AlarmContainer;
+import com.krnchik.model.alarm.AlarmTimeContainer;
 import com.krnchik.model.alarm.AlarmModel;
 import com.krnchik.model.alarm.Container;
 import com.krnchik.model.audio.Audio;
 import com.krnchik.model.audio.AudioModel;
+import com.krnchik.model.history.History;
+import com.krnchik.model.history.HistoryModel;
 
 import java.io.File;
 import java.util.Scanner;
@@ -21,8 +23,9 @@ public class App {
     public static void main(String[] args) {
         File file = new File("CoolBit.wav");
         Audio audio = new AudioModel(file);
-        Alarm alarm = new AlarmModel(audio);
-        Container container = new AlarmContainer(alarm);
+        History history = new HistoryModel();
+        Alarm alarm = new AlarmModel(audio, history);
+        Container container = new AlarmTimeContainer(alarm);
         App app = new App(container);
         app.init();
     }
