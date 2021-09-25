@@ -1,21 +1,21 @@
-package com.krnchik.model.mode;
+package com.krnchik.model.theme;
 
-public abstract class ModeBuilder {
+public abstract class ThemeBuilder {
 
-    protected Mode mode;
+    protected Theme theme;
 
     public void create() {
-        mode = new Mode();
+        theme = new Theme();
     }
 
     abstract void buildImage();
-    abstract void buildFile();
+    abstract void buildSound();
     abstract void buildBackground();
     abstract void buildButtonTheme();
     abstract void buildTextFieldTheme();
     abstract void buildTime();
 
-    public Mode getMode() {
-        return mode;
+    public Theme getTheme() {
+        return theme;
     }
 }
