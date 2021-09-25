@@ -8,12 +8,12 @@ public class Domestic extends ThemeBuilder {
 
     @Override
     void buildImage() {
-        theme.setImage(new ImageIcon("domestic.png"));
+        theme.setImage(new ImageIcon("mode\\domestic\\domestic.png"));
     }
 
     @Override
     void buildSound() {
-        theme.setSound(new File("domestic.wav"));
+        theme.setSound(new File("mode\\domestic\\domestic.wav"));
     }
 
     @Override
